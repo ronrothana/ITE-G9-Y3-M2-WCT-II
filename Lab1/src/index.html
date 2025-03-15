@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        h2 {
+            color: #090909;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+        }
+        .container {
+            width: 40%;
+            margin: auto;
+            background: rgb(241, 153, 213);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px gray;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        label {
+            font-weight: bold;
+            text-align: left;
+            display: block;
+        }
+        input {
+            padding: 10px;
+            width: 95%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #218838;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            padding: 15px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background: #121bbf;
+            color: white;
+        }
+        .edit {
+            background: #ffc107;
+        }
+        .delete {
+            background: #dc3545;
+        }
+        .edit:hover {
+            background: #e0a800;
+        }
+        .delete:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Classroom Management mini APP</h2>
+
+    <div class="container">
+        <h3>Add Student</h3>
+        <form id="studentForm">
+            <input type="hidden" id="studentId" name="id">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" required>
+
+            <button type="submit">ADD Student</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <h3>Student List</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody id="studentTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            loadStudents();
+
+            $("#studentForm").submit(function (e) {
+                e.preventDefault();
+                let formData = $(this).serialize();
+                $.post("data.php", formData + "&action=save", function () {
+                    loadStudents();
+                    $("#studentForm")[0].reset();
+                });
+            });
+
+            $(document).on("click", ".delete", function () {
+                let id = $(this).data("id");
+                $.post("data.php", { id: id, action: "delete" }, function () {
+                    loadStudents();
+                });
+            });
+
+            $(document).on("click", ".edit", function () {
+                let id = $(this).data("id");
+                $.get("data.php?action=get&id=" + id, function (data) {
+                    let student = JSON.parse(data);
+                    $("#studentId").val(student.id);
+                    $("#name").val(student.name);
+                    $("#age").val(student.age);
+                });
+            });
+
+            function loadStudents() {
+                $.get("data.php?action=list", function (data) {
+                    $("#studentTable").html(data);
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
